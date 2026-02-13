@@ -1,0 +1,61 @@
+# redis-rs
+services:
+  redis-master:
+    image: redis:8-alpine
+    entrypoint: /redis-master.sh
+    environment:
+      KJH_REDIS_ANNOUNCE_PORT: 6379
+    volumes:
+      # Redis default data directory: /data
+      - redis-master-data:/data
+      - ./redis-master.sh:/redis-master.sh:ro
+    ports:
+      - "6379:6379"
+
+  redis-replica:
+    image: redis:8-alpine
+    entrypoint: /redis-replica.sh
+    environment:
+      KJH_REDIS_MASTER_HOST: host.containers.internal
+      KJH_REDIS_MASTER_PORT: 6379
+      KJH_REDIS_ANNOUNCE_PORT: 6380
+    depends_on:
+      - redis-master
+    volumes:
+      # Redis default data directory: /data
+      - redis-replica-data:/data
+      - ./redis-replica.sh:/redis-replica.sh:ro
+    ports:
+      - "6380:6379"
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    depends_on:
+      - redis-master
+    command:
+      - --redis.addr=redis://host.containers.internal:6379
+    ports:
+      - "9121:9121"
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    depends_on:
+      - redis-master
+    environment:
+      RI_REDIS_HOST_1: host.containers.internal
+      RI_REDIS_PORT_1: 6379
+      RI_REDIS_ALIAS_1: master
+      RI_REDIS_HOST_2: host.containers.internal
+      RI_REDIS_PORT_2: 6380
+      RI_REDIS_ALIAS_2: replica
+    volumes:
+      - redisinsight-data:/data
+    ports:
+      - "5540:5540"
+
+volumes:
+  redis-master-data:
+  redis-replica-data:
+  redisinsight-data:
+
+

@@ -1,0 +1,14 @@
+# top-most EditorConfig file
+root = true
+
+[*]
+charset = utf-8
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.sh]
+end_of_line = lf
+
+[*.{alloy,csproj,html,json,md,props,river,slnx,toml,xaml,xml,yaml,yml}]
+indent_size = 2
