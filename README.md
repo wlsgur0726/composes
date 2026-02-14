@@ -32,7 +32,8 @@
 - ### [redis-cluster](./redis-cluster/compose.yml)
   - redis 3*2
 - ### [redis-rs](./redis-rs/compose.yml)
-  - 2 nodes
+  - 2 nodes + sentinel 3 nodes
+  - sentinel proxy 1 node (envoy)
 
 ## mongo
 버전 8 사용, [기본포트](https://www.mongodb.com/ko-kr/docs/manual/reference/default-mongodb-port/#default-mongodb-port) 사용하고 mongos의 LB만 노출
@@ -40,7 +41,7 @@
   - mongodb_exporter (docker.io/percona/mongodb_exporter)
   - compass-web (docker.io/haohanyang/compass-web)
 - ### [mongo-cluster](./mongo-cluster/compose.yml)
-  - mongos LB 1
+  - mongos proxy 1
   - mongos 3
   - configsvr 3
   - shard 3*3

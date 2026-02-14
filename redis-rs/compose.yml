@@ -1,37 +1,80 @@
 # redis-rs
 services:
-  redis-master:
+  redis-rs-1:
     image: redis:8-alpine
-    entrypoint: /redis-master.sh
+    entrypoint: /redis-node.sh
     environment:
       ARG_REDIS_ANNOUNCE_PORT: 6379
+      ARG_REDIS_BOOTSTRAP_AS_MASTER: "true"
     volumes:
       # Redis default data directory: /data
-      - redis-master-data:/data
-      - ./redis-master.sh:/redis-master.sh:ro
+      - redis-rs-1-data:/data
+      - ./redis-node.sh:/redis-node.sh:ro
     ports:
       - "6379:6379"
 
-  redis-replica:
+  redis-rs-2:
     image: redis:8-alpine
-    entrypoint: /redis-replica.sh
+    entrypoint: /redis-node.sh
     environment:
-      ARG_REDIS_MASTER_HOST: host.containers.internal
-      ARG_REDIS_MASTER_PORT: 6379
       ARG_REDIS_ANNOUNCE_PORT: 6380
+      ARG_REDIS_BOOTSTRAP_AS_MASTER: "false"
+      ARG_REDIS_BOOTSTRAP_MASTER_HOST: host.containers.internal
+      ARG_REDIS_BOOTSTRAP_MASTER_PORT: 6379
     depends_on:
-      - redis-master
+      - redis-rs-1
     volumes:
       # Redis default data directory: /data
-      - redis-replica-data:/data
-      - ./redis-replica.sh:/redis-replica.sh:ro
+      - redis-rs-2-data:/data
+      - ./redis-node.sh:/redis-node.sh:ro
     ports:
       - "6380:6379"
+
+  redis-sentinel-1:
+    image: redis:8-alpine
+    entrypoint: /redis-sentinel.sh
+    depends_on:
+      - redis-rs-1
+      - redis-rs-2
+    volumes:
+      - redis-sentinel-1-data:/data
+      - ./redis-sentinel.sh:/redis-sentinel.sh:ro
+
+  redis-sentinel-2:
+    image: redis:8-alpine
+    entrypoint: /redis-sentinel.sh
+    depends_on:
+      - redis-rs-1
+      - redis-rs-2
+    volumes:
+      - redis-sentinel-2-data:/data
+      - ./redis-sentinel.sh:/redis-sentinel.sh:ro
+
+  redis-sentinel-3:
+    image: redis:8-alpine
+    entrypoint: /redis-sentinel.sh
+    depends_on:
+      - redis-rs-1
+      - redis-rs-2
+    volumes:
+      - redis-sentinel-3-data:/data
+      - ./redis-sentinel.sh:/redis-sentinel.sh:ro
+
+  redis-sentinel-proxy:
+    image: envoyproxy/envoy:v1.33-latest
+    depends_on:
+      - redis-sentinel-1
+      - redis-sentinel-2
+      - redis-sentinel-3
+    volumes:
+      - ./redis-sentinel-proxy.config.yml:/etc/envoy/envoy.yaml:ro
+    ports:
+      - "26379:26379"
 
   redis-exporter:
     image: oliver006/redis_exporter:latest
     depends_on:
-      - redis-master
+      - redis-rs-1
     command:
       - --redis.addr=redis://host.containers.internal:6379
     ports:
@@ -40,14 +83,18 @@ services:
   redisinsight:
     image: redis/redisinsight:latest
     depends_on:
-      - redis-master
+      - redis-rs-1
+      - redis-sentinel-proxy
     environment:
       RI_REDIS_HOST_1: host.containers.internal
       RI_REDIS_PORT_1: 6379
-      RI_REDIS_ALIAS_1: master
+      RI_REDIS_ALIAS_1: redis-rs-1
       RI_REDIS_HOST_2: host.containers.internal
       RI_REDIS_PORT_2: 6380
-      RI_REDIS_ALIAS_2: replica
+      RI_REDIS_ALIAS_2: redis-rs-2
+      RI_REDIS_HOST_3: redis-sentinel-proxy
+      RI_REDIS_ALIAS_3: redis-sentinel-proxy
+      RI_REDIS_PORT_3: 26379
     volumes:
       - redisinsight-data:/data
     ports:
@@ -60,6 +107,9 @@ networks:
     driver: bridge
 
 volumes:
-  redis-master-data:
-  redis-replica-data:
+  redis-rs-1-data:
+  redis-rs-2-data:
+  redis-sentinel-1-data:
+  redis-sentinel-2-data:
+  redis-sentinel-3-data:
   redisinsight-data:

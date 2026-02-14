@@ -3,7 +3,7 @@ services:
   compass-web:
     image: haohanyang/compass-web:latest
     depends_on:
-      envoy:
+      mongos-proxy:
         condition: service_started
       mongo-cluster-init-router:
         condition: service_completed_successfully
@@ -12,18 +12,18 @@ services:
       - --host
       - 0.0.0.0
       - --mongo-uri
-      - mongodb://envoy:27017
+      - mongodb://mongos-proxy:27017
     ports:
       - "8080:8080"
 
-  envoy:
+  mongos-proxy:
     image: envoyproxy/envoy:v1.33-latest
     depends_on:
       - mongos-1
       - mongos-2
       - mongos-3
     volumes:
-      - ./envoy.yaml:/etc/envoy/envoy.yaml:ro
+      - ./mongos-proxy.config.yml:/etc/envoy/envoy.yaml:ro
     ports:
       - "27017:27017"
       - "9901:9901"
@@ -232,9 +232,9 @@ services:
   mongodb-exporter:
     image: percona/mongodb_exporter:0.48
     depends_on:
-      - envoy
+      - mongos-proxy
     command:
-      - --mongodb.uri=mongodb://envoy:27017
+      - --mongodb.uri=mongodb://mongos-proxy:27017
     ports:
       - "9216:9216"
 
