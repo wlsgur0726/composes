@@ -1,0 +1,103 @@
+# 로컬 테스트용 Tempo(single-binary) 설정
+#
+# 목적
+# - 로컬 테스트에서 각종 제한으로 수집/쿼리가 막히지 않게 제한 완화
+# - gRPC 요청/응답 크기 제한을 충분히 크게
+# - 로컬 디스크 저장소가 무한히 커지지 않게 retention 적용
+
+# 멀티테넌시 비활성화(X-Scope-OrgID 미사용).
+multitenancy_enabled: false
+
+server:
+  http_listen_port: 3200
+
+  # 기본값이 보수적이라 큰 트레이스에서 "received message larger than max" 류가 날 수 있어 상향.
+  # 단위: 바이트(bytes)
+  grpc_server_max_recv_msg_size: 268435456 # 256MiB
+  grpc_server_max_send_msg_size: 268435456 # 256MiB
+
+distributor:
+  # receiver 설정은 OpenTelemetry receivers로 그대로 전달됩니다.
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+  # 로컬 테스트에서는 큰 attribute가 들어와도 잘리지 않게(0 = 비활성화).
+  # 주의: 실제 운영에선 OOM 방지를 위해 적절한 상한을 두는 것이 안전합니다.
+  max_attribute_bytes: 0
+
+querier:
+  # 로컬 테스트에서 오래 걸리는 조회 허용.
+  trace_by_id:
+    query_timeout: 1m
+  search:
+    query_timeout: 10m
+
+query_frontend:
+  # 로컬 테스트에서 API/query timeout을 넉넉히.
+  api_timeout: 10m
+
+  # TraceQL 표현식 크기 제한 완화(기본 128KiB).
+  max_query_expression_size_bytes: 1048576 # 1MiB
+
+  # 429(too many requests) 방지를 위해 큐 제한 상향.
+  max_outstanding_per_tenant: 20000
+
+  search:
+    # 프론트엔드의 search 최대 기간 제한 해제(0 = 비활성화).
+    max_duration: 0
+
+    # 결과 limit 관련 보호장치 완화(0 = 비활성화).
+    max_result_limit: 0
+
+    # 로컬에서 자주 쓰는 "Span Limit" 상한 해제(0 = 비활성화).
+    max_spans_per_span_set: 0
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+overrides:
+  defaults:
+    # 수집(ingestion) 관련 제한 완화.
+    ingestion:
+      # 429(RATE_LIMITED) 방지를 위해 크게 상향.
+      rate_limit_bytes: 1073741824 # 1GiB/s
+      burst_size_bytes: 2147483648 # 2GiB burst
+
+      # 활성 트레이스 제한 해제(0 = 비활성화).
+      max_traces_per_user: 0
+      max_global_traces_per_user: 0
+
+      # attribute 크기 제한 해제(0 = 비활성화).
+      max_attribute_bytes: 0
+
+    # 읽기(read) 관련 제한 완화.
+    read:
+      # 태그 값 자동완성 등에서 큰 응답을 허용(0 = 비활성화).
+      max_bytes_per_tag_values_query: 0
+      max_blocks_per_tag_values_query: 0
+      max_search_duration: 0
+      max_metrics_duration: 0
+
+    # 트레이스 자체 크기 제한 완화.
+    global:
+      # 0 = 비활성화. (기본은 5MB)
+      max_bytes_per_trace: 0
+
+    # retention은 compactor.block_retention에 의해 결정되며,
+    # 필요하면 여기서 테넌트별로 조정 가능합니다.
+    compaction:
+      block_retention: 0s
+
+metrics_generator:
+  storage:
+    path: /var/tempo/generator

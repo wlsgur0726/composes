@@ -1,0 +1,140 @@
+# 로컬 테스트용 Loki(single-binary) 설정
+#
+# 목적
+# - 로컬 테스트에서 각종 제한으로 요청이 막히지 않게 제한 완화
+# - gRPC 요청/응답 크기 제한을 충분히 크게
+# - 파일시스템 저장소가 너무 커지지 않게 짧은 보존 + compactor + chunk 파일 수 억제
+
+# 멀티테넌트 인증 비활성화(X-Scope-OrgID 미사용, OrgID는 'fake'로 고정).
+auth_enabled: false
+
+server:
+  # HTTP API(push/query) 리슨 포트.
+  http_listen_port: 3100
+
+  # gRPC 서버 설정(내부 컴포넌트 간 통신에 사용).
+  # 기본값이 보수적이라 "received message larger than max" 류 에러가 날 수 있어 상향합니다.
+  # 단위: 바이트(bytes)
+  grpc_server_max_recv_msg_size: 268435456 # 256MiB
+  grpc_server_max_send_msg_size: 268435456 # 256MiB
+
+common:
+  # Loki의 로컬 상태(chunks/index/cache/compactor/wal 등)는 모두 이 경로 아래에 저장됩니다.
+  path_prefix: /loki
+
+  # 오브젝트 스토어로 로컬 파일시스템을 사용합니다.
+  storage:
+    filesystem:
+      # chunk 파일 저장 위치.
+      chunks_directory: /loki/chunks
+      # ruler 규칙(rule) 파일 저장 위치.
+      rules_directory: /loki/rules
+
+  # 단일 인스턴스이므로 복제는 1.
+  replication_factor: 1
+
+  # 단일 인스턴스 ring(로컬 테스트용으로 inmemory).
+  ring:
+    kvstore:
+      store: inmemory
+
+storage_config:
+  # 파일시스템 오브젝트 스토어 디렉터리(common.storage.*와 동일 경로로 맞춤).
+  filesystem:
+    directory: /loki/chunks
+
+  # TSDB shipper 디렉터리(볼륨 아래에 둬서 리셋이 쉬움).
+  tsdb_shipper:
+    active_index_directory: /loki/tsdb-index
+    cache_location: /loki/tsdb-cache
+
+schema_config:
+  # filesystem 오브젝트 스토어 + TSDB(single store) 스키마.
+  # 주의: retention/compactor가 기대대로 동작하려면 index period는 24h가 권장됩니다.
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+ingester:
+  # chunk flush 빈도를 낮춰 파일이 자잘하게 많이 생기는 현상을 줄입니다.
+  # 트레이드오프: 메모리 버퍼링이 약간 늘 수 있습니다.
+  chunk_idle_period: 1h
+  max_chunk_age: 4h
+  chunk_block_size: 1048576   # 1MiB (비압축)
+  chunk_target_size: 5242880  # 5MiB (압축 후 목표)
+
+  # WAL을 /loki 아래에 저장하여 크래시/재시작 시에도 승인된 데이터 유실을 줄입니다.
+  wal:
+    enabled: true
+    dir: /loki/wal
+
+distributor:
+  # gRPC로 수신 가능한 최대 메시지 크기(바이트).
+  # single-binary 모드에서도 내부 컴포넌트 경로에서 영향이 있을 수 있어 상향합니다.
+  max_recv_msg_size: 268435456 # 256MiB
+
+ingester_client:
+  # distributor/querier 등이 ingester와 통신할 때 쓰는 gRPC 클라이언트 설정.
+  grpc_client_config:
+    max_recv_msg_size: 268435456 # 256MiB
+    max_send_msg_size: 268435456 # 256MiB
+
+limits_config:
+  # 구조화된 메타데이터 허용.
+  allow_structured_metadata: true
+
+  # 구조화된 메타데이터 크기/개수 제한 상향.
+  max_structured_metadata_size: 256MB
+  max_structured_metadata_entries_count: 1024
+
+  # 과거 샘플 거부 비활성화(로컬 환경에서 시간 오차가 있을 때 유용).
+  reject_old_samples: false
+
+  # 라인 최대 길이 제한 해제(0 = 무제한).
+  max_line_size: 0
+  max_line_size_truncate: false
+
+  # 로컬 테스트에서 429(too many requests) 방지를 위해 ingestion rate 제한을 크게 상향.
+  ingestion_rate_mb: 1024         # 1GiB/s
+  ingestion_burst_size_mb: 2048   # 2GiB 버스트
+
+  # 활성 스트림 수 제한 해제(0 = 비활성화).
+  max_streams_per_user: 0
+
+  # 큰 쿼리가 제한에 걸리지 않도록 쿼리 관련 제한 상향.
+  max_entries_limit_per_query: 1000000
+  max_query_series: 1000000
+  max_streams_matchers_per_query: 100000
+  cardinality_limit: 1000000
+
+  # 로컬 테스트에서 오래 걸리는 쿼리 허용.
+  query_timeout: 10m
+
+  # 보존 기간(파일시스템이 무한히 커지는 것을 방지).
+  # 주의: compactor.retention_enabled=true 가 필요합니다.
+  retention_period: 7d
+
+compactor:
+  # 컴팩션/보존 처리 시 사용하는 작업 디렉터리.
+  working_directory: /loki/compactor
+
+  # TSDB 인덱스 컴팩션 주기.
+  compaction_interval: 10m
+
+  # 보존(retention) 삭제 기능 활성화.
+  retention_enabled: true
+
+  # 삭제 요청(delete request) 저장소(로컬은 filesystem 사용).
+  delete_request_store: filesystem
+
+  # 삭제 마킹 후 실제 삭제까지 지연(짧은 기간 쿼리 안정성 확보).
+  retention_delete_delay: 30m
+
+  # 삭제 작업 워커 수(동시 처리량).
+  retention_delete_worker_count: 50
+

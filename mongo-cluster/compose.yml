@@ -32,7 +32,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-mongos.sh
     environment:
-      KJH_MONGO_CONFIGDB: cfgRS/configsvr-1:27019,configsvr-2:27019,configsvr-3:27019
+      ARG_MONGO_CONFIGDB: cfgRS/configsvr-1:27019,configsvr-2:27019,configsvr-3:27019
     volumes:
       - ./mongo-mongos.sh:/mongo-mongos.sh:ro
     depends_on:
@@ -43,7 +43,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-mongos.sh
     environment:
-      KJH_MONGO_CONFIGDB: cfgRS/configsvr-1:27019,configsvr-2:27019,configsvr-3:27019
+      ARG_MONGO_CONFIGDB: cfgRS/configsvr-1:27019,configsvr-2:27019,configsvr-3:27019
     volumes:
       - ./mongo-mongos.sh:/mongo-mongos.sh:ro
     depends_on:
@@ -54,7 +54,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-mongos.sh
     environment:
-      KJH_MONGO_CONFIGDB: cfgRS/configsvr-1:27019,configsvr-2:27019,configsvr-3:27019
+      ARG_MONGO_CONFIGDB: cfgRS/configsvr-1:27019,configsvr-2:27019,configsvr-3:27019
     volumes:
       - ./mongo-mongos.sh:/mongo-mongos.sh:ro
     depends_on:
@@ -65,7 +65,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-configsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: cfgRS
+      ARG_MONGO_REPLSET_NAME: cfgRS
     volumes:
       # MongoDB default data directory: /data/db
       - configsvr-1-data:/data/db
@@ -75,7 +75,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-configsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: cfgRS
+      ARG_MONGO_REPLSET_NAME: cfgRS
     volumes:
       # MongoDB default data directory: /data/db
       - configsvr-2-data:/data/db
@@ -85,7 +85,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-configsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: cfgRS
+      ARG_MONGO_REPLSET_NAME: cfgRS
     volumes:
       # MongoDB default data directory: /data/db
       - configsvr-3-data:/data/db
@@ -95,7 +95,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: shard1RS
+      ARG_MONGO_REPLSET_NAME: shard1RS
     volumes:
       # MongoDB default data directory: /data/db
       - shard1-1-data:/data/db
@@ -105,7 +105,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: shard1RS
+      ARG_MONGO_REPLSET_NAME: shard1RS
     volumes:
       # MongoDB default data directory: /data/db
       - shard1-2-data:/data/db
@@ -115,7 +115,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: shard1RS
+      ARG_MONGO_REPLSET_NAME: shard1RS
     volumes:
       # MongoDB default data directory: /data/db
       - shard1-3-data:/data/db
@@ -125,7 +125,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: shard2RS
+      ARG_MONGO_REPLSET_NAME: shard2RS
     volumes:
       # MongoDB default data directory: /data/db
       - shard2-1-data:/data/db
@@ -135,7 +135,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: shard2RS
+      ARG_MONGO_REPLSET_NAME: shard2RS
     volumes:
       # MongoDB default data directory: /data/db
       - shard2-2-data:/data/db
@@ -145,7 +145,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: shard2RS
+      ARG_MONGO_REPLSET_NAME: shard2RS
     volumes:
       # MongoDB default data directory: /data/db
       - shard2-3-data:/data/db
@@ -155,7 +155,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: shard3RS
+      ARG_MONGO_REPLSET_NAME: shard3RS
     volumes:
       # MongoDB default data directory: /data/db
       - shard3-1-data:/data/db
@@ -165,7 +165,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: shard3RS
+      ARG_MONGO_REPLSET_NAME: shard3RS
     volumes:
       # MongoDB default data directory: /data/db
       - shard3-2-data:/data/db
@@ -175,7 +175,7 @@ services:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
-      KJH_MONGO_REPLSET_NAME: shard3RS
+      ARG_MONGO_REPLSET_NAME: shard3RS
     volumes:
       # MongoDB default data directory: /data/db
       - shard3-3-data:/data/db

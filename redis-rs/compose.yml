@@ -4,7 +4,7 @@ services:
     image: redis:8-alpine
     entrypoint: /redis-master.sh
     environment:
-      KJH_REDIS_ANNOUNCE_PORT: 6379
+      ARG_REDIS_ANNOUNCE_PORT: 6379
     volumes:
       # Redis default data directory: /data
       - redis-master-data:/data
@@ -16,9 +16,9 @@ services:
     image: redis:8-alpine
     entrypoint: /redis-replica.sh
     environment:
-      KJH_REDIS_MASTER_HOST: host.containers.internal
-      KJH_REDIS_MASTER_PORT: 6379
-      KJH_REDIS_ANNOUNCE_PORT: 6380
+      ARG_REDIS_MASTER_HOST: host.containers.internal
+      ARG_REDIS_MASTER_PORT: 6379
+      ARG_REDIS_ANNOUNCE_PORT: 6380
     depends_on:
       - redis-master
     volumes:

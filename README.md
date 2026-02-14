@@ -1,5 +1,6 @@
 # composes
-로컬테스트용 compose 파일 모음
+- 로컬테스트용 compose 파일 모음.
+- 특정 프로젝트에 종속적이지 않은, 범용적으로 사용할 수 있는 시스템들을 대상으로 함.
 
 ## 사전 구성
 - ### shared-net 네트워크 생성
@@ -18,6 +19,10 @@
     # for Poddman
     127.0.0.1 host.containers.internal
     ```
+
+## consul
+- server, 3 nodes
+- client 1 node 노출
 
 ## redis
 버전 8 사용
@@ -41,3 +46,9 @@
   - shard 3*3
 - ### [mongo-rs](./mongo-rs/compose.yml)
   - 3 nodes
+
+## loki
+latest 버전 사용, 제약이 될만한 설정들 모두 완화
+
+## tempo
+latest 버전 사용, 제약이 될만한 설정들 모두 완화

@@ -1,0 +1,68 @@
+# consul
+services:
+  consul-server-1:
+    image: hashicorp/consul:latest
+    container_name: consul-server-1
+    entrypoint: /entrypoint.sh
+    environment:
+      ARG_CONSUL_RETRY_JOIN: consul-server-2 consul-server-3
+    volumes:
+      - consul-server-1-data:/consul/data
+      - ./entrypoint.sh:/entrypoint.sh:ro
+    restart: unless-stopped
+
+  consul-server-2:
+    image: hashicorp/consul:latest
+    container_name: consul-server-2
+    entrypoint: /entrypoint.sh
+    environment:
+      ARG_CONSUL_RETRY_JOIN: consul-server-1 consul-server-3
+    volumes:
+      - consul-server-2-data:/consul/data
+      - ./entrypoint.sh:/entrypoint.sh:ro
+    restart: unless-stopped
+
+  consul-server-3:
+    image: hashicorp/consul:latest
+    container_name: consul-server-3
+    entrypoint: /entrypoint.sh
+    environment:
+      ARG_CONSUL_RETRY_JOIN: consul-server-1 consul-server-2
+    volumes:
+      - consul-server-3-data:/consul/data
+      - ./entrypoint.sh:/entrypoint.sh:ro
+    restart: unless-stopped
+
+  consul-client:
+    image: hashicorp/consul:latest
+    container_name: consul-client
+    command:
+      - agent
+      - -ui
+      - -data-dir=/consul/data
+      - -client=0.0.0.0
+      - -retry-join=consul-server-1
+      - -retry-join=consul-server-2
+      - -retry-join=consul-server-3
+    ports:
+      - "8500:8500" # HTTP API & UI
+      - "8600:8600/udp" # DNS
+    volumes:
+      - consul-client-data:/consul/data
+    restart: unless-stopped
+    depends_on:
+      - consul-server-1
+      - consul-server-2
+      - consul-server-3
+
+networks:
+  default:
+    name: shared-net
+    external: true
+    driver: bridge
+
+volumes:
+  consul-server-1-data:
+  consul-server-2-data:
+  consul-server-3-data:
+  consul-client-data:

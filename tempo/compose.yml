@@ -1,0 +1,24 @@
+# tempo
+services:
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    ports:
+      - "3200:3200" # HTTP API
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    volumes:
+      - ./tempo.config.yml:/etc/tempo.yaml:ro
+      - tempo-data:/var/tempo
+    command: -config.file=/etc/tempo.yaml
+    restart: unless-stopped
+
+networks:
+  default:
+    name: shared-net
+    external: true
+    driver: bridge
+
+volumes:
+  tempo-data:
+    driver: local

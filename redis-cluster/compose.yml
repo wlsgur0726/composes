@@ -4,8 +4,8 @@ services:
     image: redis:8-alpine
     entrypoint: /entrypoint.sh
     environment:
-      KJH_REDIS_CLUSTER_PORT: 6379
-      KJH_REDIS_CLUSTER_BUS_PORT: 16379
+      ARG_REDIS_CLUSTER_PORT: 6379
+      ARG_REDIS_CLUSTER_BUS_PORT: 16379
     volumes:
       # Redis default data directory: /data
       - redis-node-1-data:/data
@@ -18,8 +18,8 @@ services:
     image: redis:8-alpine
     entrypoint: /entrypoint.sh
     environment:
-      KJH_REDIS_CLUSTER_PORT: 6380
-      KJH_REDIS_CLUSTER_BUS_PORT: 16380
+      ARG_REDIS_CLUSTER_PORT: 6380
+      ARG_REDIS_CLUSTER_BUS_PORT: 16380
     volumes:
       # Redis default data directory: /data
       - redis-node-2-data:/data
@@ -32,8 +32,8 @@ services:
     image: redis:8-alpine
     entrypoint: /entrypoint.sh
     environment:
-      KJH_REDIS_CLUSTER_PORT: 6381
-      KJH_REDIS_CLUSTER_BUS_PORT: 16381
+      ARG_REDIS_CLUSTER_PORT: 6381
+      ARG_REDIS_CLUSTER_BUS_PORT: 16381
     volumes:
       # Redis default data directory: /data
       - redis-node-3-data:/data
@@ -46,8 +46,8 @@ services:
     image: redis:8-alpine
     entrypoint: /entrypoint.sh
     environment:
-      KJH_REDIS_CLUSTER_PORT: 6382
-      KJH_REDIS_CLUSTER_BUS_PORT: 16382
+      ARG_REDIS_CLUSTER_PORT: 6382
+      ARG_REDIS_CLUSTER_BUS_PORT: 16382
     volumes:
       # Redis default data directory: /data
       - redis-node-4-data:/data
@@ -60,8 +60,8 @@ services:
     image: redis:8-alpine
     entrypoint: /entrypoint.sh
     environment:
-      KJH_REDIS_CLUSTER_PORT: 6383
-      KJH_REDIS_CLUSTER_BUS_PORT: 16383
+      ARG_REDIS_CLUSTER_PORT: 6383
+      ARG_REDIS_CLUSTER_BUS_PORT: 16383
     volumes:
       # Redis default data directory: /data
       - redis-node-5-data:/data
@@ -74,8 +74,8 @@ services:
     image: redis:8-alpine
     entrypoint: /entrypoint.sh
     environment:
-      KJH_REDIS_CLUSTER_PORT: 6384
-      KJH_REDIS_CLUSTER_BUS_PORT: 16384
+      ARG_REDIS_CLUSTER_PORT: 6384
+      ARG_REDIS_CLUSTER_BUS_PORT: 16384
     volumes:
       # Redis default data directory: /data
       - redis-node-6-data:/data
