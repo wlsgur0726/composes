@@ -238,6 +238,12 @@ services:
     ports:
       - "9216:9216"
 
+networks:
+  default:
+    name: shared-net
+    external: true
+    driver: bridge
+
 volumes:
   configsvr-1-data:
   configsvr-2-data:

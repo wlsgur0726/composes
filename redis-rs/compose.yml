@@ -53,9 +53,13 @@ services:
     ports:
       - "5540:5540"
 
+networks:
+  default:
+    name: shared-net
+    external: true
+    driver: bridge
+
 volumes:
   redis-master-data:
   redis-replica-data:
   redisinsight-data:
-
-

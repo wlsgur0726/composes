@@ -1,14 +1,23 @@
 # composes
 로컬테스트용 compose 파일 모음
 
-## hosts 수정 필요
-- win: `C:\Windows\System32\drivers\etc\hosts`
-- mac: `/private/etc/hosts`
-- 다음 내용 추가
-  ```
-  # for Poddman
-  127.0.0.1 host.containers.internal
-  ```
+## 사전 구성
+- ### shared-net 네트워크 생성
+  - 서로 다른 compose 간 서비스 이름으로 통신하기 위한 목적
+    ```bash
+    podman network create shared-net
+    ```
+
+- ### hosts 수정 필요
+  - redis처럼 자신의 주소를 `host.containers.internal`로 announce하고, 호스트가 그 주소로 접속할 필요가 있는 경우를 위함
+  - 파일 위치
+    - win: `C:\Windows\System32\drivers\etc\hosts`
+    - mac: `/private/etc/hosts`
+  - 다음 내용 추가
+    ```
+    # for Poddman
+    127.0.0.1 host.containers.internal
+    ```
 
 ## redis
 버전 8 사용
