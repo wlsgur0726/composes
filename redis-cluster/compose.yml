@@ -101,10 +101,19 @@ services:
   redis-exporter:
     image: oliver006/redis_exporter:latest
     command:
-      - --redis.addr=redis://host.containers.internal:6379
+      - --redis.addr=redis://host.containers.internal:6379,redis://host.containers.internal:6380,redis://host.containers.internal:6381,redis://host.containers.internal:6382,redis://host.containers.internal:6383,redis://host.containers.internal:6384
+      - --is-cluster
     depends_on:
       - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+      - redis-node-5
+      - redis-node-6
     ports:
+      # redis_exporter의 discover-cluster-nodes 기능이
+      # 각 node가 announce하는 주소를 반환하는데,
+      # 그 주소가 host.containers.internal 이므로 매핑 필요
       - "9121:9121"
 
   redisinsight:
