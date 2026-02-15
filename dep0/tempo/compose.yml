@@ -9,7 +9,7 @@ services:
       - "4318:4318" # OTLP HTTP
     volumes:
       - ./tempo.config.yml:/etc/tempo.yaml:ro
-      - tempo-data:/var/tempo
+      - tempo-vol:/var/tempo
     command: -config.file=/etc/tempo.yaml
     restart: unless-stopped
 
@@ -20,5 +20,5 @@ networks:
     driver: bridge
 
 volumes:
-  tempo-data:
+  tempo-vol:
     driver: local

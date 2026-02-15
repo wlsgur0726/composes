@@ -8,10 +8,17 @@ services:
       ARG_REDIS_BOOTSTRAP_AS_MASTER: "true"
     volumes:
       # Redis default data directory: /data
-      - redis-rs-1-data:/data
+      - redis-rs-1-vol:/data
       - ./redis-node.sh:/redis-node.sh:ro
     ports:
       - "6379:6379"
+
+  redis-rs-1-exporter:
+    image: oliver006/redis_exporter:latest
+    depends_on:
+      - redis-rs-1
+    command:
+      - --redis.addr=redis-rs-1:6379
 
   redis-rs-2:
     image: redis:8-alpine
@@ -25,10 +32,17 @@ services:
       - redis-rs-1
     volumes:
       # Redis default data directory: /data
-      - redis-rs-2-data:/data
+      - redis-rs-2-vol:/data
       - ./redis-node.sh:/redis-node.sh:ro
     ports:
       - "6380:6379"
+
+  redis-rs-2-exporter:
+    image: oliver006/redis_exporter:latest
+    depends_on:
+      - redis-rs-2
+    command:
+      - --redis.addr=redis-rs-2:6379
 
   redis-sentinel-1:
     image: redis:8-alpine
@@ -37,7 +51,7 @@ services:
       - redis-rs-1
       - redis-rs-2
     volumes:
-      - redis-sentinel-1-data:/data
+      - redis-sentinel-1-vol:/data
       - ./redis-sentinel.sh:/redis-sentinel.sh:ro
 
   redis-sentinel-2:
@@ -47,7 +61,7 @@ services:
       - redis-rs-1
       - redis-rs-2
     volumes:
-      - redis-sentinel-2-data:/data
+      - redis-sentinel-2-vol:/data
       - ./redis-sentinel.sh:/redis-sentinel.sh:ro
 
   redis-sentinel-3:
@@ -57,7 +71,7 @@ services:
       - redis-rs-1
       - redis-rs-2
     volumes:
-      - redis-sentinel-3-data:/data
+      - redis-sentinel-3-vol:/data
       - ./redis-sentinel.sh:/redis-sentinel.sh:ro
 
   redis-sentinel-proxy:
@@ -71,21 +85,14 @@ services:
     ports:
       - "26379:26379"
 
-  redis-exporter:
-    image: oliver006/redis_exporter:latest
-    depends_on:
-      - redis-rs-1
-    command:
-      - --redis.addr=redis://host.containers.internal:6379
-    ports:
-      - "9121:9121"
-
   redisinsight:
     image: redis/redisinsight:latest
     depends_on:
       - redis-rs-1
       - redis-sentinel-proxy
     environment:
+      RI_FILES_LOGGER: "false"
+      RI_ACCEPT_TERMS_AND_CONDITIONS: "true"
       RI_REDIS_HOST_1: host.containers.internal
       RI_REDIS_PORT_1: 6379
       RI_REDIS_ALIAS_1: redis-rs-1
@@ -95,8 +102,6 @@ services:
       RI_REDIS_HOST_3: redis-sentinel-proxy
       RI_REDIS_ALIAS_3: redis-sentinel-proxy
       RI_REDIS_PORT_3: 26379
-    volumes:
-      - redisinsight-data:/data
     ports:
       - "5540:5540"
 
@@ -107,9 +112,8 @@ networks:
     driver: bridge
 
 volumes:
-  redis-rs-1-data:
-  redis-rs-2-data:
-  redis-sentinel-1-data:
-  redis-sentinel-2-data:
-  redis-sentinel-3-data:
-  redisinsight-data:
+  redis-rs-1-vol:
+  redis-rs-2-vol:
+  redis-sentinel-1-vol:
+  redis-sentinel-2-vol:
+  redis-sentinel-3-vol:

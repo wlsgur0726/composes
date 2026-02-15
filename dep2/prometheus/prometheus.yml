@@ -1,0 +1,86 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: file-sd
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/targets.yml
+        refresh_interval: 1m
+    relabel_configs:
+      - source_labels: [metrics_path]
+        target_label: __metrics_path__
+      - source_labels: [scheme]
+        target_label: __scheme__
+      - action: labeldrop
+        regex: scheme|metrics_path
+
+  - job_name: statics
+    static_configs:
+      - targets:
+        - loki:3100
+        - tempo:3200
+        - prometheus:9090
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_.*'
+        action: drop
+
+  - job_name: envoy
+    metrics_path: /stats/prometheus
+    static_configs:
+      - targets: ['envoy-dfp:9901']
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_.*'
+        action: drop
+
+  - job_name: consul
+    metrics_path: /v1/agent/metrics
+    params:
+      format: [prometheus]
+    static_configs:
+      - targets:
+        - consul-server-1:8500
+        - consul-server-2:8500
+        - consul-server-3:8500
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_.*'
+        action: drop
+
+  - job_name: redis-rs
+    static_configs:
+      - targets:
+        - redis-rs-1-exporter:9121
+        - redis-rs-2-exporter:9121
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_.*'
+        action: drop
+
+  - job_name: redis-cluster
+    http_sd_configs:
+      - url: http://redis-cluster-exporter:9121/discover-cluster-nodes
+        refresh_interval: 10m
+    metrics_path: /scrape
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: redis-cluster-exporter:9121
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_.*'
+        action: drop
+
+  - job_name: mongo-rs
+    static_configs:
+      - targets:
+        - mongo-rs-exporter:9216
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_.*'
+        action: drop

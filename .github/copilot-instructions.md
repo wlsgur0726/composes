@@ -1,6 +1,7 @@
 # 주요 지침
 
-- 제공할 compose를 `/제품명/compose.yml` 경로에 작성
+- 제공할 compose를 `/dep{N}/시스템/compose.yml` 경로에 작성
+  - N은 의존성을 나타냄. 0은 의존성이 없는 시스템, 1은 0에 의존하는 시스템, 2는 1에 의존하는 시스템, ...
 
 - rootless podman 기준으로 작성, 명령도 podman 기반, docker 호환성 유지
 

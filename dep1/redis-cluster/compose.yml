@@ -8,7 +8,7 @@ services:
       ARG_REDIS_CLUSTER_BUS_PORT: 16379
     volumes:
       # Redis default data directory: /data
-      - redis-node-1-data:/data
+      - redis-node-1-vol:/data
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "6379:6379"
@@ -22,7 +22,7 @@ services:
       ARG_REDIS_CLUSTER_BUS_PORT: 16380
     volumes:
       # Redis default data directory: /data
-      - redis-node-2-data:/data
+      - redis-node-2-vol:/data
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "6380:6379"
@@ -36,7 +36,7 @@ services:
       ARG_REDIS_CLUSTER_BUS_PORT: 16381
     volumes:
       # Redis default data directory: /data
-      - redis-node-3-data:/data
+      - redis-node-3-vol:/data
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "6381:6379"
@@ -50,7 +50,7 @@ services:
       ARG_REDIS_CLUSTER_BUS_PORT: 16382
     volumes:
       # Redis default data directory: /data
-      - redis-node-4-data:/data
+      - redis-node-4-vol:/data
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "6382:6379"
@@ -64,7 +64,7 @@ services:
       ARG_REDIS_CLUSTER_BUS_PORT: 16383
     volumes:
       # Redis default data directory: /data
-      - redis-node-5-data:/data
+      - redis-node-5-vol:/data
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "6383:6379"
@@ -78,7 +78,7 @@ services:
       ARG_REDIS_CLUSTER_BUS_PORT: 16384
     volumes:
       # Redis default data directory: /data
-      - redis-node-6-data:/data
+      - redis-node-6-vol:/data
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "6384:6379"
@@ -98,11 +98,11 @@ services:
     volumes:
       - ./init-cluster.sh:/init-cluster.sh:ro
 
-  redis-exporter:
+  redis-cluster-exporter:
     image: oliver006/redis_exporter:latest
     command:
-      - --redis.addr=redis://host.containers.internal:6379,redis://host.containers.internal:6380,redis://host.containers.internal:6381,redis://host.containers.internal:6382,redis://host.containers.internal:6383,redis://host.containers.internal:6384
       - --is-cluster
+      - --redis.addr=redis-node-1:6379
     depends_on:
       - redis-node-1
       - redis-node-2
@@ -121,6 +121,8 @@ services:
     depends_on:
       - redis-node-1
     environment:
+      RI_FILES_LOGGER: "false"
+      RI_ACCEPT_TERMS_AND_CONDITIONS: "true"
       RI_REDIS_HOST_1: host.containers.internal
       RI_REDIS_PORT_1: 6379
       RI_REDIS_ALIAS_1: node-1
@@ -139,8 +141,6 @@ services:
       RI_REDIS_HOST_6: host.containers.internal
       RI_REDIS_PORT_6: 6384
       RI_REDIS_ALIAS_6: node-6
-    volumes:
-      - redisinsight-data:/data
     ports:
       - "5540:5540"
 
@@ -151,10 +151,9 @@ networks:
     driver: bridge
 
 volumes:
-  redis-node-1-data:
-  redis-node-2-data:
-  redis-node-3-data:
-  redis-node-4-data:
-  redis-node-5-data:
-  redis-node-6-data:
-  redisinsight-data:
+  redis-node-1-vol:
+  redis-node-2-vol:
+  redis-node-3-vol:
+  redis-node-4-vol:
+  redis-node-5-vol:
+  redis-node-6-vol:

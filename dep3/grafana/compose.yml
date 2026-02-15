@@ -1,0 +1,20 @@
+# grafana
+services:
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: true
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_SERVER_ROOT_URL: /grafana/3000 # envoy-dfp를 통해 접속
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning:ro
+      - grafana-vol:/var/lib/grafana
+
+networks:
+  default:
+    name: shared-net
+    external: true
+    driver: bridge
+
+volumes:
+  grafana-vol:

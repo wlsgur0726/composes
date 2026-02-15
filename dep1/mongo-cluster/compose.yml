@@ -68,7 +68,7 @@ services:
       ARG_MONGO_REPLSET_NAME: cfgRS
     volumes:
       # MongoDB default data directory: /data/db
-      - configsvr-1-data:/data/db
+      - configsvr-1-vol:/data/db
       - ./mongo-configsvr.sh:/mongo-configsvr.sh:ro
 
   configsvr-2:
@@ -78,7 +78,7 @@ services:
       ARG_MONGO_REPLSET_NAME: cfgRS
     volumes:
       # MongoDB default data directory: /data/db
-      - configsvr-2-data:/data/db
+      - configsvr-2-vol:/data/db
       - ./mongo-configsvr.sh:/mongo-configsvr.sh:ro
 
   configsvr-3:
@@ -88,7 +88,7 @@ services:
       ARG_MONGO_REPLSET_NAME: cfgRS
     volumes:
       # MongoDB default data directory: /data/db
-      - configsvr-3-data:/data/db
+      - configsvr-3-vol:/data/db
       - ./mongo-configsvr.sh:/mongo-configsvr.sh:ro
 
   shard1-1:
@@ -98,7 +98,7 @@ services:
       ARG_MONGO_REPLSET_NAME: shard1RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard1-1-data:/data/db
+      - shard1-1-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   shard1-2:
@@ -108,7 +108,7 @@ services:
       ARG_MONGO_REPLSET_NAME: shard1RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard1-2-data:/data/db
+      - shard1-2-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   shard1-3:
@@ -118,7 +118,7 @@ services:
       ARG_MONGO_REPLSET_NAME: shard1RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard1-3-data:/data/db
+      - shard1-3-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   shard2-1:
@@ -128,7 +128,7 @@ services:
       ARG_MONGO_REPLSET_NAME: shard2RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard2-1-data:/data/db
+      - shard2-1-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   shard2-2:
@@ -138,7 +138,7 @@ services:
       ARG_MONGO_REPLSET_NAME: shard2RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard2-2-data:/data/db
+      - shard2-2-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   shard2-3:
@@ -148,7 +148,7 @@ services:
       ARG_MONGO_REPLSET_NAME: shard2RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard2-3-data:/data/db
+      - shard2-3-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   shard3-1:
@@ -158,7 +158,7 @@ services:
       ARG_MONGO_REPLSET_NAME: shard3RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard3-1-data:/data/db
+      - shard3-1-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   shard3-2:
@@ -168,7 +168,7 @@ services:
       ARG_MONGO_REPLSET_NAME: shard3RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard3-2-data:/data/db
+      - shard3-2-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   shard3-3:
@@ -178,7 +178,7 @@ services:
       ARG_MONGO_REPLSET_NAME: shard3RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard3-3-data:/data/db
+      - shard3-3-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   mongo-cluster-init-config-rs:
@@ -245,15 +245,15 @@ networks:
     driver: bridge
 
 volumes:
-  configsvr-1-data:
-  configsvr-2-data:
-  configsvr-3-data:
-  shard1-1-data:
-  shard1-2-data:
-  shard1-3-data:
-  shard2-1-data:
-  shard2-2-data:
-  shard2-3-data:
-  shard3-1-data:
-  shard3-2-data:
-  shard3-3-data:
+  configsvr-1-vol:
+  configsvr-2-vol:
+  configsvr-3-vol:
+  shard1-1-vol:
+  shard1-2-vol:
+  shard1-3-vol:
+  shard2-1-vol:
+  shard2-2-vol:
+  shard2-3-vol:
+  shard3-1-vol:
+  shard3-2-vol:
+  shard3-3-vol:

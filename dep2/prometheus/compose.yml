@@ -1,0 +1,21 @@
+# prometheus
+services:
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.external-url=/prometheus/9090 # envoy-dfp를 통해 접속
+      - --web.route-prefix=/
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./file_sd_targets.yml:/etc/prometheus/file_sd/targets.yml:ro
+      - prometheus-vol:/prometheus
+
+networks:
+  default:
+    name: shared-net
+    external: true
+    driver: bridge
+
+volumes:
+  prometheus-vol:

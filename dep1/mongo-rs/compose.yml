@@ -5,7 +5,7 @@ services:
     entrypoint: /entrypoint.sh
     volumes:
       # MongoDB default data directory: /data/db
-      - mongo-rs-1-data:/data/db
+      - mongo-rs-1-vol:/data/db
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "27017:27017"
@@ -15,7 +15,7 @@ services:
     entrypoint: /entrypoint.sh
     volumes:
       # MongoDB default data directory: /data/db
-      - mongo-rs-2-data:/data/db
+      - mongo-rs-2-vol:/data/db
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "27018:27017"
@@ -25,7 +25,7 @@ services:
     entrypoint: /entrypoint.sh
     volumes:
       # MongoDB default data directory: /data/db
-      - mongo-rs-3-data:/data/db
+      - mongo-rs-3-vol:/data/db
       - ./entrypoint.sh:/entrypoint.sh:ro
     ports:
       - "27019:27017"
@@ -70,6 +70,6 @@ networks:
     driver: bridge
 
 volumes:
-  mongo-rs-1-data:
-  mongo-rs-2-data:
-  mongo-rs-3-data:
+  mongo-rs-1-vol:
+  mongo-rs-2-vol:
+  mongo-rs-3-vol:
