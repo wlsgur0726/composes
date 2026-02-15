@@ -24,6 +24,11 @@
 - server, 3 nodes
 - client 1 node 노출
 
+## envoy-dfp
+- envoy 1 node
+- Dynamic Forward Proxy 기능을 활용하여 http 중계
+- `localhost:40000/some-container/3000/...` 요청을 받아 `some-container:3000/...`로 중계
+
 ## redis
 버전 8 사용
 - ### 공통

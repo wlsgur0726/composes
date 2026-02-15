@@ -1,0 +1,14 @@
+# envoy-dfp
+services:
+  envoy-dfp:
+    image: envoyproxy/envoy:v1.33-latest
+    volumes:
+      - ./envoy-dfp.config.yml:/etc/envoy/envoy.yaml:ro
+    ports:
+      - "40000:40000"
+
+networks:
+  default:
+    name: shared-net
+    external: true
+    driver: bridge
