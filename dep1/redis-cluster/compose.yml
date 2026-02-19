@@ -142,7 +142,18 @@ services:
       RI_REDIS_PORT_6: 6384
       RI_REDIS_ALIAS_6: node-6
     ports:
-      - "5540:5540"
+      - "15540:5540"
+
+  consul-register:
+    image: hashicorp/consul:latest
+    entrypoint: /entrypoint.sh
+    restart: "no"
+    depends_on:
+      - redisinsight
+      - redis-cluster-exporter
+    volumes:
+      - ../../shared/consul-register/entrypoint.sh:/entrypoint.sh:ro
+      - ./consul-register.json:/config/services.json:ro
 
 networks:
   default:

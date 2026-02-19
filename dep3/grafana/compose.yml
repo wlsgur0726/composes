@@ -10,6 +10,16 @@ services:
       - ./provisioning:/etc/grafana/provisioning:ro
       - grafana-vol:/var/lib/grafana
 
+  consul-register:
+    image: hashicorp/consul:latest
+    entrypoint: /entrypoint.sh
+    restart: "no"
+    depends_on:
+      - grafana
+    volumes:
+      - ../../shared/consul-register/entrypoint.sh:/entrypoint.sh:ro
+      - ./consul-register.json:/config/services.json:ro
+
 networks:
   default:
     name: shared-net

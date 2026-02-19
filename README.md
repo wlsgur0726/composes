@@ -29,6 +29,9 @@
 - Dynamic Forward Proxy 기능을 활용하여 http 중계
 - `localhost:40000/some-container/3000/...` 요청을 받아 `some-container:3000/...`로 중계
 
+## links-for-host
+- 호스트에서 접근 가능한 링크들 모음
+
 ## redis
 버전 8 사용
 - ### 공통

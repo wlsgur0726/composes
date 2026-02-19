@@ -1,0 +1,38 @@
+{
+  "services": [
+    {
+      "id": "redisinsight",
+      "name": "redisinsight",
+      "tags": [
+        "frontend-link"
+      ],
+      "address": "localhost",
+      "port": 15540,
+      "meta": {
+        "url": "http://localhost:15540"
+      },
+      "check": {
+        "http": "http://redisinsight:5540/api/health",
+        "interval": "15s",
+        "deregister_critical_service_after": "1m"
+      }
+    },
+    {
+      "id": "redis-cluster-exporter",
+      "name": "redis-cluster-exporter",
+      "tags": [
+        "frontend-link"
+      ],
+      "address": "localhost",
+      "port": 9121,
+      "meta": {
+        "url": "http://localhost:9121/metrics"
+      },
+      "check": {
+        "tcp": "redis-cluster-exporter:9121",
+        "interval": "15s",
+        "deregister_critical_service_after": "1m"
+      }
+    }
+  ]
+}

@@ -41,27 +41,38 @@ services:
     volumes:
       - ./init-replset.sh:/init-replset.sh:ro
 
-  mongodb-exporter:
+  mongo-rs-exporter:
     image: percona/mongodb_exporter:0.48
     depends_on:
       - mongo-rs-1
+      - mongo-rs-2
+      - mongo-rs-3
     command:
-      - --mongodb.uri=mongodb://host.containers.internal:27017,host.containers.internal:27018,host.containers.internal:27019/?replicaSet=rs0
-    ports:
-      - "9216:9216"
+      - --collector.collstats-limit=0
+      - --collect-all=true
+      - --collector.replicasetstatus=true
+      - --mongodb.uri=mongodb://mongo-rs-1:27017,mongo-rs-2:27017,mongo-rs-3:27017/?replicaSet=rs0
 
-  compass-web:
+  mongo-compass:
     image: haohanyang/compass-web:latest
     depends_on:
       - mongo-rs-init
-    command:
-      - compass-web
-      - --host
-      - 0.0.0.0
-      - --mongo-uri
-      - mongodb://host.containers.internal:27017,host.containers.internal:27018,host.containers.internal:27019/?replicaSet=rs0
+    environment:
+      CW_HOST: 0.0.0.0
+      CW_MONGO_URI: mongodb://mongo-rs-1:27017,mongo-rs-2:27017,mongo-rs-3:27017/?replicaSet=rs0
     ports:
-      - "8080:8080"
+      - "27999:8080"
+
+  consul-register:
+    image: hashicorp/consul:latest
+    entrypoint: /entrypoint.sh
+    restart: "no"
+    depends_on:
+      - mongo-compass
+      - mongo-rs-exporter
+    volumes:
+      - ../../shared/consul-register/entrypoint.sh:/entrypoint.sh:ro
+      - ./consul-register.json:/config/services.json:ro
 
 networks:
   default:

@@ -1,0 +1,38 @@
+{
+  "services": [
+    {
+      "id": "mongo-compass",
+      "name": "mongo-compass",
+      "tags": [
+        "frontend-link"
+      ],
+      "address": "localhost",
+      "port": 27999,
+      "meta": {
+        "url": "http://localhost:27999"
+      },
+      "check": {
+        "tcp": "mongo-compass:8080",
+        "interval": "15s",
+        "deregister_critical_service_after": "1m"
+      }
+    },
+    {
+      "id": "mongo-cluster-exporter",
+      "name": "mongo-cluster-exporter",
+      "tags": [
+        "frontend-link"
+      ],
+      "address": "localhost",
+      "port": 40000,
+      "meta": {
+        "url": "http://localhost:40000/mongo-cluster-exporter/9216/metrics"
+      },
+      "check": {
+        "tcp": "mongo-cluster-exporter:9216",
+        "interval": "15s",
+        "deregister_critical_service_after": "1m"
+      }
+    }
+  ]
+}

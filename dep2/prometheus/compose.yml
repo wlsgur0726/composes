@@ -11,6 +11,16 @@ services:
       - ./file_sd_targets.yml:/etc/prometheus/file_sd/targets.yml:ro
       - prometheus-vol:/prometheus
 
+  consul-register:
+    image: hashicorp/consul:latest
+    entrypoint: /entrypoint.sh
+    restart: "no"
+    depends_on:
+      - prometheus
+    volumes:
+      - ../../shared/consul-register/entrypoint.sh:/entrypoint.sh:ro
+      - ./consul-register.json:/config/services.json:ro
+
 networks:
   default:
     name: shared-net

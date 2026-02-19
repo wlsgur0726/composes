@@ -1,20 +1,17 @@
 # mongo-cluster
 services:
-  compass-web:
+  mongo-compass:
     image: haohanyang/compass-web:latest
     depends_on:
       mongos-proxy:
         condition: service_started
-      mongo-cluster-init-router:
+      mongo-cluster-init-sharded-cluster:
         condition: service_completed_successfully
-    command:
-      - compass-web
-      - --host
-      - 0.0.0.0
-      - --mongo-uri
-      - mongodb://mongos-proxy:27017
+    environment:
+      CW_HOST: 0.0.0.0
+      CW_MONGO_URI: mongodb://mongos-proxy:27017
     ports:
-      - "8080:8080"
+      - "27999:8080"
 
   mongos-proxy:
     image: envoyproxy/envoy:v1.33-latest
@@ -32,211 +29,225 @@ services:
     image: mongo:8
     entrypoint: /mongo-mongos.sh
     environment:
-      ARG_MONGO_CONFIGDB: cfgRS/configsvr-1:27019,configsvr-2:27019,configsvr-3:27019
+      ARG_MONGO_CONFIGDB: cfgRS/mongo-configsvr-1:27019,mongo-configsvr-2:27019,mongo-configsvr-3:27019
     volumes:
       - ./mongo-mongos.sh:/mongo-mongos.sh:ro
     depends_on:
-      mongo-cluster-init-shard-rs:
+      mongo-cluster-init-each-shard-rs:
         condition: service_completed_successfully
 
   mongos-2:
     image: mongo:8
     entrypoint: /mongo-mongos.sh
     environment:
-      ARG_MONGO_CONFIGDB: cfgRS/configsvr-1:27019,configsvr-2:27019,configsvr-3:27019
+      ARG_MONGO_CONFIGDB: cfgRS/mongo-configsvr-1:27019,mongo-configsvr-2:27019,mongo-configsvr-3:27019
     volumes:
       - ./mongo-mongos.sh:/mongo-mongos.sh:ro
     depends_on:
-      mongo-cluster-init-shard-rs:
+      mongo-cluster-init-each-shard-rs:
         condition: service_completed_successfully
 
   mongos-3:
     image: mongo:8
     entrypoint: /mongo-mongos.sh
     environment:
-      ARG_MONGO_CONFIGDB: cfgRS/configsvr-1:27019,configsvr-2:27019,configsvr-3:27019
+      ARG_MONGO_CONFIGDB: cfgRS/mongo-configsvr-1:27019,mongo-configsvr-2:27019,mongo-configsvr-3:27019
     volumes:
       - ./mongo-mongos.sh:/mongo-mongos.sh:ro
     depends_on:
-      mongo-cluster-init-shard-rs:
+      mongo-cluster-init-each-shard-rs:
         condition: service_completed_successfully
 
-  configsvr-1:
+  mongo-configsvr-1:
     image: mongo:8
     entrypoint: /mongo-configsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: cfgRS
     volumes:
-      # MongoDB default data directory: /data/db
-      - configsvr-1-vol:/data/db
+      # MongoDB configsvr default data directory: /data/configdb
+      - mongo-configsvr-1-vol:/data/configdb
       - ./mongo-configsvr.sh:/mongo-configsvr.sh:ro
 
-  configsvr-2:
+  mongo-configsvr-2:
     image: mongo:8
     entrypoint: /mongo-configsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: cfgRS
     volumes:
-      # MongoDB default data directory: /data/db
-      - configsvr-2-vol:/data/db
+      # MongoDB configsvr default data directory: /data/configdb
+      - mongo-configsvr-2-vol:/data/configdb
       - ./mongo-configsvr.sh:/mongo-configsvr.sh:ro
 
-  configsvr-3:
+  mongo-configsvr-3:
     image: mongo:8
     entrypoint: /mongo-configsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: cfgRS
     volumes:
-      # MongoDB default data directory: /data/db
-      - configsvr-3-vol:/data/db
+      # MongoDB configsvr default data directory: /data/configdb
+      - mongo-configsvr-3-vol:/data/configdb
       - ./mongo-configsvr.sh:/mongo-configsvr.sh:ro
 
-  shard1-1:
+  mongo-shard1-1:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: shard1RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard1-1-vol:/data/db
+      - mongo-shard1-1-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
-  shard1-2:
+  mongo-shard1-2:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: shard1RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard1-2-vol:/data/db
+      - mongo-shard1-2-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
-  shard1-3:
+  mongo-shard1-3:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: shard1RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard1-3-vol:/data/db
+      - mongo-shard1-3-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
-  shard2-1:
+  mongo-shard2-1:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: shard2RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard2-1-vol:/data/db
+      - mongo-shard2-1-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
-  shard2-2:
+  mongo-shard2-2:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: shard2RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard2-2-vol:/data/db
+      - mongo-shard2-2-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
-  shard2-3:
+  mongo-shard2-3:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: shard2RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard2-3-vol:/data/db
+      - mongo-shard2-3-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
-  shard3-1:
+  mongo-shard3-1:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: shard3RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard3-1-vol:/data/db
+      - mongo-shard3-1-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
-  shard3-2:
+  mongo-shard3-2:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: shard3RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard3-2-vol:/data/db
+      - mongo-shard3-2-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
-  shard3-3:
+  mongo-shard3-3:
     image: mongo:8
     entrypoint: /mongo-shardsvr.sh
     environment:
       ARG_MONGO_REPLSET_NAME: shard3RS
     volumes:
       # MongoDB default data directory: /data/db
-      - shard3-3-vol:/data/db
+      - mongo-shard3-3-vol:/data/db
       - ./mongo-shardsvr.sh:/mongo-shardsvr.sh:ro
 
   mongo-cluster-init-config-rs:
     image: mongo:8
     depends_on:
-      - configsvr-1
-      - configsvr-2
-      - configsvr-3
+      - mongo-configsvr-1
+      - mongo-configsvr-2
+      - mongo-configsvr-3
     restart: "no"
     entrypoint: /init-config-rs.sh
     volumes:
       - ./init-config-rs.sh:/init-config-rs.sh:ro
 
-  mongo-cluster-init-shard-rs:
+  mongo-cluster-init-each-shard-rs:
     image: mongo:8
     depends_on:
       mongo-cluster-init-config-rs:
         condition: service_completed_successfully
-      shard1-1:
+      mongo-shard1-1:
         condition: service_started
-      shard1-2:
+      mongo-shard1-2:
         condition: service_started
-      shard1-3:
+      mongo-shard1-3:
         condition: service_started
-      shard2-1:
+      mongo-shard2-1:
         condition: service_started
-      shard2-2:
+      mongo-shard2-2:
         condition: service_started
-      shard2-3:
+      mongo-shard2-3:
         condition: service_started
-      shard3-1:
+      mongo-shard3-1:
         condition: service_started
-      shard3-2:
+      mongo-shard3-2:
         condition: service_started
-      shard3-3:
+      mongo-shard3-3:
         condition: service_started
     restart: "no"
-    entrypoint: /init-shard-rs.sh
+    entrypoint: /init-each-shard-rs.sh
     volumes:
-      - ./init-shard-rs.sh:/init-shard-rs.sh:ro
+      - ./init-each-shard-rs.sh:/init-each-shard-rs.sh:ro
 
-  mongo-cluster-init-router:
+  mongo-cluster-init-sharded-cluster:
     image: mongo:8
     depends_on:
       - mongos-1
     restart: "no"
-    entrypoint: /init-router.sh
+    entrypoint: /init-sharded-cluster.sh
     volumes:
-      - ./init-router.sh:/init-router.sh:ro
+      - ./init-sharded-cluster.sh:/init-sharded-cluster.sh:ro
 
-  mongodb-exporter:
+  mongo-cluster-exporter:
     image: percona/mongodb_exporter:0.48
     depends_on:
       - mongos-proxy
     command:
-      - --mongodb.uri=mongodb://mongos-proxy:27017
-    ports:
-      - "9216:9216"
+      - --collector.collstats-limit=0
+      - --collect-all=true
+      - --collector.replicasetstatus=true
+      - --collector.shards=true
+      - --split-cluster=true
+      - --mongodb.uri=mongodb://mongos-1:27017,mongos-2:27017,mongos-3:27017,mongo-shard1-1:27018,mongo-shard1-2:27018,mongo-shard1-3:27018,mongo-shard2-1:27018,mongo-shard2-2:27018,mongo-shard2-3:27018,mongo-shard3-1:27018,mongo-shard3-2:27018,mongo-shard3-3:27018/?directConnection=true
+
+  consul-register:
+    image: hashicorp/consul:latest
+    entrypoint: /entrypoint.sh
+    restart: "no"
+    depends_on:
+      - mongo-compass
+      - mongo-cluster-exporter
+    volumes:
+      - ../../shared/consul-register/entrypoint.sh:/entrypoint.sh:ro
+      - ./consul-register.json:/config/services.json:ro
 
 networks:
   default:
@@ -245,15 +256,15 @@ networks:
     driver: bridge
 
 volumes:
-  configsvr-1-vol:
-  configsvr-2-vol:
-  configsvr-3-vol:
-  shard1-1-vol:
-  shard1-2-vol:
-  shard1-3-vol:
-  shard2-1-vol:
-  shard2-2-vol:
-  shard2-3-vol:
-  shard3-1-vol:
-  shard3-2-vol:
-  shard3-3-vol:
+  mongo-configsvr-1-vol:
+  mongo-configsvr-2-vol:
+  mongo-configsvr-3-vol:
+  mongo-shard1-1-vol:
+  mongo-shard1-2-vol:
+  mongo-shard1-3-vol:
+  mongo-shard2-1-vol:
+  mongo-shard2-2-vol:
+  mongo-shard2-3-vol:
+  mongo-shard3-1-vol:
+  mongo-shard3-2-vol:
+  mongo-shard3-3-vol:

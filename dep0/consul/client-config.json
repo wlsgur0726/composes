@@ -1,0 +1,19 @@
+{
+  "data_dir": "/consul/data",
+  "client_addr": "0.0.0.0",
+  "retry_join": [
+    "consul-server-1",
+    "consul-server-2",
+    "consul-server-3"
+  ],
+  "ui_config": {
+    "enabled": true
+  },
+  "http_config": {
+    "response_headers": {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*",
+      "Access-Control-Allow-Headers": "*"
+    }
+  }
+}

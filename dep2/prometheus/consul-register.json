@@ -1,0 +1,21 @@
+{
+  "services": [
+    {
+      "id": "prometheus",
+      "name": "prometheus",
+      "tags": [
+        "frontend-link"
+      ],
+      "address": "localhost",
+      "port": 40000,
+      "meta": {
+        "url": "http://localhost:40000/prometheus/9090"
+      },
+      "check": {
+        "http": "http://prometheus:9090/-/healthy",
+        "interval": "15s",
+        "deregister_critical_service_after": "1m"
+      }
+    }
+  ]
+}

@@ -103,7 +103,19 @@ services:
       RI_REDIS_ALIAS_3: redis-sentinel-proxy
       RI_REDIS_PORT_3: 26379
     ports:
-      - "5540:5540"
+      - "15540:5540"
+
+  consul-register:
+    image: hashicorp/consul:latest
+    entrypoint: /entrypoint.sh
+    restart: "no"
+    depends_on:
+      - redisinsight
+      - redis-rs-1-exporter
+      - redis-rs-2-exporter
+    volumes:
+      - ../../shared/consul-register/entrypoint.sh:/entrypoint.sh:ro
+      - ./consul-register.json:/config/services.json:ro
 
 networks:
   default:

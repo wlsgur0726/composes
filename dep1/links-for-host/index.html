@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Links</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 640px;
+      margin: 40px auto;
+      padding: 0 16px;
+      background: #f8f9fa;
+      color: #212529;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 24px;
+    }
+
+    #status {
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    #status.error {
+      color: #dc3545;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: #6c757d;
+    }
+
+    .dot.passing {
+      background: #28a745;
+    }
+
+    .dot.warning {
+      background: #ffc107;
+    }
+
+    .dot.critical {
+      background: #dc3545;
+    }
+
+    a {
+      text-decoration: none;
+      color: #0d6efd;
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .url {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Service Links</h1>
+  <div id="status">Loading...</div>
+  <ul id="list"></ul>
+
+  <script>
+    const CONSUL = 'http://localhost:8500';
+    const TAG = 'frontend-link';
+
+    // Static services
+    const STATIC_SERVICES = [
+      { name: 'Consul UI', url: 'http://localhost:8500/ui' },
+      { name: 'Envoy DFP Admin', url: 'http://localhost:40000/envoy-dfp/9901' }
+    ];
+
+    async function checkBrowserReachable(url) {
+      try {
+        await fetch(url, { mode: 'no-cors', signal: AbortSignal.timeout(5000) });
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    async function load() {
+      const status = document.getElementById('status');
+      const list = document.getElementById('list');
+
+      try {
+        // 1. Static services: browser reachability only
+        const staticDetails = await Promise.all(STATIC_SERVICES.map(async ({ name, url }) => {
+          const reachable = await checkBrowserReachable(url);
+          return { name, url, health: reachable ? 'passing' : 'critical' };
+        }));
+
+        // 2. Consul services: consul health AND browser reachability
+        const svcsRes = await fetch(`${CONSUL}/v1/catalog/services`);
+        if (!svcsRes.ok) throw new Error(`catalog/services: HTTP ${svcsRes.status}`);
+        const svcsMap = await svcsRes.json();
+
+        const names = Object.entries(svcsMap)
+          .filter(([, tags]) => tags.includes(TAG))
+          .map(([name]) => name)
+          .sort();
+
+        const consulDetails = await Promise.all(names.map(async (name) => {
+          const r = await fetch(`${CONSUL}/v1/health/service/${encodeURIComponent(name)}`);
+          if (!r.ok) throw new Error(`health/service/${name}: HTTP ${r.status}`);
+          const instances = await r.json();
+          if (instances.length === 0) return null;
+
+          const { Service, Checks } = instances[0];
+          const meta = Service.Meta || {};
+          const url = meta.url
+            ? meta.url
+            : `http://${Service.Address}:${Service.Port}`;
+
+          // Consul health
+          const statuses = Checks.map(c => c.Status);
+          const consulHealth = statuses.includes('critical') ? 'critical'
+            : statuses.includes('warning') ? 'warning'
+              : 'passing';
+
+          // Browser reachability (only if consul is passing)
+          const browserOk = consulHealth === 'passing'
+            ? await checkBrowserReachable(url)
+            : false;
+
+          const health = consulHealth !== 'passing' ? consulHealth
+            : browserOk ? 'passing' : 'critical';
+
+          return { name, url, health };
+        }));
+
+        // Combine and render
+        const allServices = [...staticDetails, ...consulDetails.filter(Boolean)];
+
+        list.innerHTML = '';
+        allServices
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .forEach(({ name, url, health }) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <span class="dot ${health}" title="${health}"></span>
+              <div>
+                <a href="${url}" target="_blank" rel="noopener">${name}</a>
+                <div class="url">${url}</div>
+              </div>`;
+            list.appendChild(li);
+          });
+
+        status.textContent = `${allServices.length} service(s) · updated ${new Date().toLocaleTimeString()}`;
+      } catch (e) {
+        status.className = 'error';
+        status.textContent = `Error: ${e.message}`;
+        console.error(e);
+      }
+    }
+
+    load();
+    setInterval(load, 15_000);
+  </script>
+</body>
+
+</html>

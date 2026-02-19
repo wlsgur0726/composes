@@ -1,0 +1,14 @@
+# links-for-host
+services:
+  links-for-host:
+    image: nginx:alpine
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+    ports:
+      - "8080:80"
+
+networks:
+  default:
+    name: shared-net
+    external: true
+    driver: bridge

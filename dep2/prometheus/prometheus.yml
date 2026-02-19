@@ -84,3 +84,12 @@ scrape_configs:
       - source_labels: [__name__]
         regex: 'go_.*'
         action: drop
+
+  - job_name: mongo-cluster
+    static_configs:
+      - targets:
+        - mongo-cluster-exporter:9216
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'go_.*'
+        action: drop

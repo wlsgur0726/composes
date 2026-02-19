@@ -34,17 +34,13 @@ services:
     image: hashicorp/consul:latest
     command:
       - agent
-      - -ui
-      - -data-dir=/consul/data
-      - -client=0.0.0.0
-      - -retry-join=consul-server-1
-      - -retry-join=consul-server-2
-      - -retry-join=consul-server-3
+      - -config-file=/consul/config/client-config.json
     ports:
       - "8500:8500" # HTTP API & UI
       - "8600:8600/udp" # DNS
     volumes:
       - consul-client-vol:/consul/data
+      - ./client-config.json:/consul/config/client-config.json:ro
     restart: unless-stopped
     depends_on:
       - consul-server-1
